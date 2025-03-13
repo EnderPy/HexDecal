@@ -1,0 +1,234 @@
+<!doctype html>
+<head>
+  <style>
+    .rangeLabel {
+      display: inline-block;
+    }
+
+    .rangeInputBox {
+      display: block;
+      width: 4em;
+      float: right;
+    }
+    .rangeInput {
+      display: block;
+    }
+    body {
+      margin: 0;
+    }
+
+    div.colourSelect {
+      clear: both;
+    }
+    input[type="color"].colourSelect {
+      float: right;
+    }
+  </style>
+</head>
+<body>
+  <div style="display: flex">
+    <div style="overflow: scroll; width: 100%; max-height: 100vh">
+      <canvas id="mainCanvas" height="100%" width="100%"> </canvas>
+    </div>
+    <div id="sidePanel">
+      <fieldset>
+        <fieldset>
+          <legend>Page Size</legend>
+          <div>
+            <label for="docWidth" class="rangeLabel">Width (px): </label
+            ><input
+              type="number"
+              name="docWidthOutput"
+              id="docWidthOutput"
+              class="rangeInputBox"
+            />
+            <input
+              type="range"
+              class="rangeInput"
+              name="docWidth"
+              id="docWidth"
+              min="100"
+              max="4096"
+              value="1920"
+            />
+          </div>
+          <div>
+            <label for="docHeight" class="rangeLabel">Height (px): </label>
+            <input
+              type="number"
+              name="docHeightOutput"
+              id="docHeightOutput"
+              class="rangeInputBox"
+            />
+            <input
+              type="range"
+              class="rangeInput"
+              name="docHeight"
+              id="docHeight"
+              min="100"
+              max="4096"
+              value="1080"
+            />
+          </div>
+        </fieldset>
+        <legend>Configure decal information</legend>
+        <fieldset>
+          <legend>Configure Decal type</legend>
+          <div id="decals">
+            <div>
+              <input
+                type="radio"
+                id="hexagon"
+                value="hexagon"
+                name="polygon"
+                checked
+              />
+              <label for="hexagon">Hexagon style</label>
+            </div>
+            <div>
+              <input
+                type="radio"
+                id="square"
+                value="square"
+                name="polygon"
+                disabled
+              />
+              <label for="square">Square style</label>
+            </div>
+            <div>
+              <input
+                type="radio"
+                id="triangle"
+                value="triangle"
+                name="polygon"
+                disabled
+              />
+              <label for="triangle">Triangle style</label>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <label for="widthSlider" class="rangeLabel">Decal width: </label>
+          <input
+            type="number"
+            name="widthSliderOutput"
+            id="widthSliderOutput"
+            class="rangeInputBox"
+          />
+          <input
+            class="rangeInput"
+            type="range"
+            id="widthSlider"
+            min="5"
+            max="200"
+            value="100"
+          />
+
+          <label for="strokeSlider" class="rangeLabel">Stroke Width: </label>
+          <input
+            type="number"
+            name="strokeSliderOutput"
+            id="strokeSliderOutput"
+            class="rangeInputBox"
+          />
+          <input
+            class="rangeInput"
+            type="range"
+            id="strokeSlider"
+            min="0"
+            max="100"
+            value="10"
+          />
+          <label for="marginSlider" class="rangeLabel">Decal Margin: </label>
+          <input
+            type="number"
+            name="marginSliderOutput"
+            id="marginSliderOutput"
+            class="rangeInputBox"
+          />
+          <input
+            class="rangeInput"
+            type="range"
+            id="marginSlider"
+            min="0"
+            max="100"
+            value="10"
+          />
+          <div class="colourSelect">
+            <input
+              type="checkbox"
+              name="lineColorCheck"
+              id="lineColorCheck"
+              checked
+            />
+
+            <label class="colourSelect" for="lineColor">Line Colour</label>
+            <input
+              class="colourSelect"
+              type="color"
+              name="lineColor"
+              id="lineColor"
+            />
+            <input
+              type="range"
+              name="lineColorOpacity"
+              id="lineColorOpacity"
+              min="0"
+              max="1"
+              value="1"
+              step="0.01"
+            />
+          </div>
+          <div class="colourSelect">
+            <input type="checkbox" name="fillColorCheck" id="fillColorCheck" />
+            <label class="colourSelect" for="fillColor"
+              >Fill Decal Colour</label
+            >
+            <input
+              class="colourSelect"
+              type="color"
+              name="fillColor"
+              id="fillColor"
+            />
+            <input
+              type="range"
+              name="fillColorOpacity"
+              id="fillColorOpacity"
+              min="0"
+              max="1"
+              value="1"
+              step="0.01"
+            />
+          </div>
+          <div class="colourSelect">
+            <input
+              type="checkbox"
+              name="backgroundColorCheck"
+              id="backgroundColorCheck"
+            />
+            <label class="colourSelect" for="backgroundColor">Background</label>
+            <input
+              class="colourSelect"
+              type="color"
+              name="backgroundColor"
+              id="backgroundColor"
+            />
+            <input
+              type="range"
+              name="backgroundColorOpacity"
+              id="backgroundColorOpacity"
+              min="0"
+              max="1"
+              value="1"
+              step="0.01"
+            />
+          </div>
+        </fieldset>
+        <input type="checkbox" name="keepUpdated" id="keepUpdated" />
+        <label for="keepUpdated">update when values changed</label>
+        <input type="button" value="Update Grid" id="generateButton" />
+      </fieldset>
+    </div>
+  </div>
+  <script src="./main.js"></script>
+</body>
