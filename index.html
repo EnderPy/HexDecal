@@ -4,7 +4,6 @@
     #mainContainer {
       display: flex;
       flex-direction: row;
-      width: 100vw;
       height: 100vh;
     }
     #canvasContainer {
@@ -15,6 +14,8 @@
     #sidePanel {
       padding: 5px;
       overflow-y: scroll;
+      width: 20em;
+      flex-shrink: 0;
     }
     .rangeLabel {
       display: inline-block;
@@ -32,28 +33,39 @@
       margin: 0;
     }
 
-    div.colorSelect {
-      clear: both;
-    }
+    /* div.colorSelect {
+    } */
     input[type="color"].colorSelect {
       float: right;
     }
+    /* input[type="range"].colorSelect {
+    } */
+
     div.iconName {
       width: 100%;
       /* clear: both; */
     }
     /* label.iconName {
     } */
-    .iconDiv > input[type="text"],
-    .iconDiv > input[type="url"] {
+    .iconDiv > input[type="text"] {
       width: 100%;
     }
-    /* .right {
-      margin-left: auto;
-      margin-right: 0px;
-    } */
+    .iconDiv > input[type="range"] {
+      display: block;
+    }
+
     fieldset {
       border-radius: 10px;
+    }
+    input[type="file"].iconUpload {
+      max-width: 16em;
+    }
+    .iconImageDiv {
+      max-width: 14em;
+      overflow: scroll;
+    }
+    .iconImage {
+      height: auto;
     }
   </style>
 </head>
@@ -193,7 +205,6 @@
               id="lineColorCheck"
               checked
             />
-
             <label class="colorSelect" for="lineColor">Line Color</label>
             <input
               class="colorSelect"
@@ -265,15 +276,15 @@
         </fieldset>
         <fieldset id="iconFieldset">
           <legend>Icon settings</legend>
-          <label for="toggleIcons" class="toggleIcons">Toggle Items</label>
-          <input type="checkbox" name="toggleIcons" id="toggleIcons" />
+          <label for="toggleIcons" class="toggleIcons" >Toggle Items</label>
+          <input type="checkbox" name="toggleIcons" id="toggleIcons"/>
           <input
             type="button"
             value="Add Icon"
             onclick="generateIconHTML.call(this)"
           />
 
-          <!--<fieldset class="iconContainer">
+          <!-- <fieldset class="iconContainer">
             <label for="toggleIcon">Toggle Icon</label>
             <input type="checkbox" name="toggleIcon" checked />
             <div class="iconDiv">
@@ -281,15 +292,33 @@
               <input type="text" class="iconName right" />
             </div>
             <div class="iconDiv">
-              <label for="iconURL">icon URL</label>
-              <input type="url" name="iconURL" class="iconURL" />
+              <label for="iconUpload">image upload</label>
+              <input type="file" name="iconUpload" class="iconUpload" />
             </div>
             <div class="iconDiv">
-              <label for="iconSize">Icon Size</label>
-              <input type="range" name="iconSize" class="iconRange" />
+              <label for="iconSize rangeLabel">Icon Size</label>
+              <input
+                type="number"
+                name="iconSizeOutput"
+                class="rangeInputBox"
+              />
+              <input
+                type="range"
+                name="iconSize"
+                class="iconRange rangeInput"
+                min="1"
+                max="500"
+              />
+              //TODO: icon offset X and Y
+
             </div>
             <div class="iconDiv">
               <label for="iconWeight">Random Weight</label>
+              <input
+                type="number"
+                name="iconWeightOutput"
+                class="rangeInputBox"
+              />
               <input
                 type="range"
                 name="iconWeight"
@@ -311,6 +340,7 @@
         <input type="checkbox" name="keepUpdated" id="keepUpdated" />
         <label for="keepUpdated">update when values changed</label>
         <input type="button" value="Update Grid" id="generateButton" />
+        <!-- <img class="iconUpload iconImage" name="iconImage" hidden /> -->
       </fieldset>
     </div>
   </div>

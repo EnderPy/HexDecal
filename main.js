@@ -29,6 +29,9 @@ var backgroundColorBox = document.getElementById("backgroundColor");
 var backgroundColorOpacitySlider = document.getElementById(
   "backgroundColorOpacity",
 );
+Array.prototype.sample = function () {
+  return this[Math.floor(Math.random() * this.length)];
+};
 var backgroundColorCheckBox = document.getElementById("backgroundColorCheck");
 // var backgroundColorClearBox = document.getElementById("backgroundColorClear");
 
@@ -215,6 +218,8 @@ function generateHexagonGrid(
   innerFillColor = fillColor,
   useBackColor = backgroundColorCheck,
   backColor = backgroundColor,
+  useImages = true,
+  // images = [] //TODO
 ) {
   ctx.clearRect(0, 0, documentWidth, documentHeight);
   // constant values
@@ -223,7 +228,7 @@ function generateHexagonGrid(
   const verticalOffset = hexHeight / 2;
   // const horizontalOffset = hexWidth / 2;
   const horizontalOffset = radius * 1.5;
-  console.log(horizontalOffset, verticalOffset);
+  // console.log(horizontalOffset, verticalOffset);
   //rows and column
   const rows = Math.ceil(documentWidth / horizontalOffset);
   const cols = Math.ceil(documentHeight / hexHeight);
@@ -241,8 +246,33 @@ function generateHexagonGrid(
   if (!useFill) {
     innerFillColor = null;
   }
+  var imagesArr;
+
+  if (useImages) {
+    var images = getIcons();
+    // console.log(images);
+
+    var totalWeight = images.totalWeight;
+    var icons = images.icons;
+    imagesArr = [];
+    for (imageOBJ of icons) {
+      // console.log("imageOBJ: ", imageOBJ);
+      var img = imageOBJ.iconFile; // console.log("first", imageOBJ.iconFile.fileValue, img); // img.height = imageOBJ.iconSize; // img.src = imageOBJ.iconFile.fileValue; // var img = new Image(); // console.log("imgOBJ:", imageOBJ);
+      // img.height = imageOBJ.iconSize;
+      // img.width = imageOBJ.iconSize;
+      imagesArr.push({
+        image: img,
+        imageSize: imageOBJ.iconSize,
+        totalWeight: parseFloat(imageOBJ.iconWeight),
+      });
+    }
+  }
+
+  // console.log(imagesArr);
+
   for (let i = 0; i <= cols; i++) {
     for (let j = 0; j <= rows; j++) {
+      // console.log(imagesArr.sample().image);
       generateHexagon(
         radius - marginVar,
         j * horizontalOffset,
@@ -250,6 +280,8 @@ function generateHexagonGrid(
         stroke,
         (strokeFill = strokeColor),
         (fill = innerFillColor),
+        undefined,
+        (image = imagesArr.length > 0 ? imagesArr.sample().image : undefined),
       );
     }
   }
@@ -263,6 +295,7 @@ function generateHexagon(
   strokeFill = null,
   fill = null,
   clear = false,
+  image = null,
 ) {
   ctx.beginPath();
   for (let i = 0; i <= 6; i++) {
@@ -277,14 +310,23 @@ function generateHexagon(
   }
   ctx.closePath();
   ctx.lineWidth = lineWidth;
-  if (clear) {
-    ctx.clear();
-  }
+  // if (clear) {
+  //   ctx.clear();
+  // }
   if (fill !== null) {
     ctx.fillStyle = fill;
     ctx.fill();
   }
-
+  if (image !== null) {
+    // console.log(image);
+    ctx.drawImage(
+      image,
+      centerX - image.width / 2,
+      centerY - image.height / 2,
+      image.width,
+      image.height,
+    );
+  }
   if (lineWidth !== null) {
     if (strokeFill !== null) {
       ctx.strokeStyle = strokeFill;
@@ -303,24 +345,43 @@ function generateIconHTML() {
   fieldNode.className = "iconContainer";
   fieldNode.innerHTML = `<label for="toggleIcon">Toggle Icon</label>
             <input type="checkbox" name="toggleIcon" checked />
-            <div class="iconDiv">
+            <div class="iconDiv iconName">
               <label for="iconName">Icon Name</label>
               <input type="text" class="iconName right" />
             </div>
-            <div class="iconDiv">
-              <label for="iconURL">icon URL</label>
-              <input type="url" name="iconURL" class="iconURL" />
+            <div class="iconDiv iconUpload">
+              <label for="iconUpload">image upload</label>
+              <input type="file" name="iconUpload" class="iconUpload" />
+              <div class="iconUpload iconImageDiv">
+                <img class="iconUpload iconImage" name="iconImage" src="" />
+              </div>
             </div>
-            <div class="iconDiv">
-              <label for="iconSize">Icon Size</label>
-              <input type="range" name="iconSize" class="iconRange" />
+            <div class="iconDiv iconSize">
+              <label for="iconSize rangeLabel">Icon Size</label>
+              <input
+                type="number"
+                name="iconSizeOutput"
+                class="rangeInputBox"
+              />
+              <input
+                type="range"
+                name="iconSize"
+                class="iconRange rangeInput"
+                min="1"
+                max="500"
+              />
             </div>
-            <div class="iconDiv">
+            <div class="iconDiv iconWeight">
               <label for="iconWeight">Random Weight</label>
+              <input
+                type="number"
+                name="iconSizeOutput"
+                class="rangeInputBox"
+              />
               <input
                 type="range"
                 name="iconWeight"
-                class="iconWeight"
+                class="iconWeight rangeInput"
                 min="0"
                 max="1"
                 value="0.5"
@@ -333,13 +394,115 @@ function generateIconHTML() {
               class="removeIcon"
               onclick="removeIcon.call(this)"
             />`;
+  var iconSizeElements = fieldNode.getElementsByClassName("iconSize")[0];
+  var iconSizeSlider = iconSizeElements.getElementsByClassName("rangeInput")[0];
+  var iconSizeOutput =
+    iconSizeElements.getElementsByClassName("rangeInputBox")[0];
+
+  var weightElements = fieldNode.getElementsByClassName("iconWeight")[0];
+  var weightSlider = weightElements.getElementsByClassName("rangeInput")[0];
+  // console.log(weightSlider);
+  var weightSliderOutput =
+    weightElements.getElementsByClassName("rangeInputBox")[0];
+  var iconUpload = fieldNode
+    .getElementsByClassName("iconUpload")
+    .namedItem("iconUpload");
+  var imageElement = fieldNode
+    .getElementsByClassName("iconUpload")
+    .namedItem("iconImage");
+  // console.log(imageElement);
+
+  imageElement.updateSize = function (width = iconSizeOutput.value) {
+    imageElement.height = width * (imageElement.width / imageElement.height);
+    imageElement.width = width;
+    if (keepUpdated) {
+      generateHexagonGrid();
+    }
+    // imageElement.style.height =
+    //   width * (imageElement.width / imageElement.height);
+  };
+  iconSizeOutput.value = iconSizeSlider.value;
+  iconSizeSlider.oninput = function () {
+    iconSizeOutput.value = this.value;
+    imageElement.updateSize();
+  };
+  iconSizeOutput.oninput = function () {
+    iconSizeSlider.value = this.value;
+
+    imageElement.updateSize();
+  };
+  weightSliderOutput.value = weightSlider.value;
+
+  weightSlider.oninput = function () {
+    weightSliderOutput.value = this.value;
+    if (keepUpdated) {
+      generateHexagonGrid();
+    }
+  };
+  weightSliderOutput.oninput = function () {
+    weightSlider.value = this.value;
+    if (keepUpdated) {
+      generateHexagonGrid();
+    }
+  };
+  iconUpload.oninput = function () {
+    // console.log(iconUpload);
+    // console.log(iconUpload.files[0]);
+    var fr = new FileReader();
+    fr.onload = function (event) {
+      imageElement.src = fr.result;
+      imageElement.updateSize();
+      // console.log("File Reader", imageElement.width, imageElement);
+    };
+    fr.readAsDataURL(iconUpload.files[0]);
+  };
   parentNode.appendChild(fieldNode);
 }
 
+function getIcons() {
+  var iconFieldset = document
+    .getElementById("iconFieldset")
+    .getElementsByClassName("iconContainer");
+  var totalWeight = 0.0;
+  var icons = [];
+  // console.log(iconFieldset);
+  for (element of iconFieldset) {
+    var toggleCheck = element
+      .getElementsByTagName("input")
+      .namedItem("toggleIcon");
+    if (!toggleCheck.checked) {
+      continue;
+    }
+    // iconFieldset.forEach((element) => {
+    var iconFile = element.getElementsByTagName("img").namedItem("iconImage");
+    var weightElement = element
+      .getElementsByClassName("iconWeight")
+      .namedItem("iconWeight");
+    totalWeight += parseFloat(weightElement.value);
+    var iconSize = element
+      .getElementsByClassName("rangeInput")
+      .namedItem("iconSize");
+    // var fr = new FileReader();
+    // fr.onload = function () {
+    //   iconFile.files[0].fileValue = fr.result;
+    // };
+    // fr.readAsDataURL(iconFile.files[0]);
+    icons.push({
+      iconFile: iconFile,
+      iconSize: iconSize.value,
+      iconWeight: weightElement.value,
+    });
+  }
+  return { icons: icons, totalWeight: totalWeight };
+}
+
 function removeIcon() {
-  console.log(this);
+  // console.log(this);
   var fieldNode = this.parentNode;
   fieldNode.parentNode.removeChild(fieldNode);
+  if (keepUpdated) {
+    generateHexagonGrid();
+  }
 }
 
 function RGBToRGBA(color, value) {
