@@ -117,12 +117,172 @@ class circleClass extends shapeClass {
 }
 
 class shapeUI {
-  constructor() {
-    this.name = undefined;
+  constructor(shape) {
+    this.shape = shape;
+    this.name = shape.name;
   }
   generateHTML = function () {
-    
-  }
+    const generateFieldset = function (title = "", check = true) {
+      let fieldset = document.createElement("fieldset");
+      let legend = document.createElement("legend");
+      if (check) {
+        let checkbox = document.createElement("input");
+        checkbox.oninput = (ev) => {
+          if (ev.target.checked) {
+            fieldset.classList.remove("hideContent");
+          } else {
+            fieldset.classList.add("hideContent");
+          }
+        };
+        checkbox.type = "checkbox";
+        checkbox.classList.add("legendCheckbox");
+      }
+      if (check) {
+        legend.appendChild(checkbox);
+      }
+      legend.appendChild(document.createTextNode(title));
+      fieldset.append(legend);
+      return fieldset;
+    };
+    var fieldset = (() => {
+      let fieldset = document.createElement("fieldset");
+      fieldset.className += "shapeFieldset";
+      // legend
+      let legend = document.createElement("legend");
+      let legendInput = document.createElement("input");
+      legendInput.type = "text";
+      legendInput.name = this.name;
+      legendInput.oninput = (ev) => (this.name = ev.target.value);
+      legend.append(legendInput);
+      fieldset.append(legend);
+      return fieldset;
+    })();
+
+    // radus, margin, weight
+    const createSlider = function (
+      // name = "",
+      title = "",
+      range = { min: 0, max: 200 },
+      value = { slider: undefined, value: undefined, sync: true },
+      type = "number",
+      updateFunction = undefined,
+    ) {
+      //define objects
+      let baseDiv = document.createElement("div");
+      let valueBox = document.createElement("input");
+      let slider = document.createElement("input");
+      let label = document.createElement("label");
+      let leftDiv = document.createElement("div");
+      // set info
+      valueBox.type = type;
+      slider.type = "range";
+      (slider.min = range.min), (slider.max = range.max);
+      label.value = title;
+      label.for = valueBox;
+      // update and link values
+      valueBox.oninput = () => {
+        value.value = valueBox.value;
+        if (sync) slider.value = valueBox.value;
+        if (updateFunction) updateFunction();
+      };
+      slider.oninput = () => {
+        value.value = slider.value;
+        if (sync) valueBox.value = slider.value;
+        if (updateFunction) updateFunction();
+      };
+      // styling and layout
+      baseDiv.classList.add("flex", "flexDiv", "inputDiv");
+      valueBox.classList.add("flexItem", "flexRight", "flexStaticWidth");
+      // slider.classList.add()
+      leftDiv.classList.add("flex", "flexDiv", "flexItem");
+      leftDiv.style.flexDirection = "column";
+      label.style.width = "100%";
+      slider.style.width = "100%";
+      leftDiv.append(label);
+      leftDiv.append(slider);
+      baseDiv.append(leftDiv);
+      baseDiv.append(valueBox);
+      return baseDiv;
+    };
+    let radius = createSlider(
+      "shape radius:",
+      undefined,
+      { slider: this.shape.radius, value: this.shape.radius, sync: true },
+      undefined,
+      this.updateGrid,
+    );
+    let margin = createSlider(
+      "shape margin:",
+      undefined,
+      { slider: this.shape.margin, value: this.shape.margin, sync: true },
+      undefined,
+      this.updateGrid,
+    );
+    let weight = createSlider(
+      "random Weight:",
+      { min: 0, max: 5 },
+      { slider: this.shape.weight, value: this.shape.weight, sync: true },
+      undefined,
+      this.updateGrid,
+    );
+    fieldset.append(radius, margin, weight);
+    let strokeFieldset = generateFieldset("strokeFieldset");
+    strokeFieldset.append(
+      (() => {
+        let transparency;
+        let color;
+        const updateColor = () => {
+          this.shape.stroke.fill = RGBToRGBA(color, transparency);
+        };
+        let colorSlider = createSlider(
+          "stroke color",
+          { min: 0, max: 255 },
+          { slider: transparency, value: color, sync: false },
+          "color",
+          updateColor,
+        );
+        let widthSlider = createSlider(
+          "stroke width",
+          { min: 0, max: 100 },
+          {
+            slider: this.shape.stroke.width,
+            value: this.shape.stroke.width,
+            sync: true,
+          },
+          undefined,
+          this.updateGrid,
+        );
+        return colorSlider, widthSlider;
+      })(),
+    );
+    let fillFieldset = generateFieldset("fillFieldset");
+    fillFieldset.append(
+      (() => {
+        let transparency;
+        let color;
+        const updateColor = () => {
+          this.shape.fill.fill = RGBToRGBA(color, transparency);
+          updateGrid()
+        };
+        let colorSlider = createSlider(
+          "fill color",
+          { min: 0, max: 255 },
+          { slider: transparency, value: color, sync: false },
+          "color",
+          updateColor,
+        );
+
+        return colorSlider, widthSlider;
+      })(),
+    );
+    let imageFieldset = generateFieldset("imageFieldset");
+    let advancedFieldset = generateFieldset("advancedFieldset");
+    fieldset.append(strokeFieldset, fillFieldset);
+  };
+  updateGrid = function () {
+    // need to update this to get all shapeUI elements
+    generateShapeGrid([this]);
+  };
 }
 
 var mainCanvas = document.getElementById("mainCanvas");
@@ -297,4 +457,8 @@ function generateShape(shape) {
     ctx.stroke();
   }
   ctx.moveTo(centerX, centerY);
+}
+function RGBToRGBA(color, value) {
+  var alphaHex = parseInt(value).toString(16).padStart(2, "0");
+  return color + alphaHex;
 }
