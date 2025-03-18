@@ -1,11 +1,12 @@
 // imp`ort cyrb64Hash from "./simple-hash.js";
 
+var keepUpdated = false;
 class shapeClass {
   constructor() {
     this.row = 0; // for generation
     this.col = 0;
-    this.radius = undefined; // multiplies height, width, offsets, and points
-    this.margin = undefined;
+    this.radius = 50; // multiplies height, width, offsets, and points
+    this.margin = 0;
     this.weight = 1;
     this.name = undefined;
     this.dimension = {
@@ -17,17 +18,20 @@ class shapeClass {
       alternateXOffset: undefined,
       alternateY: false,
       alternateYOffset: undefined,
-      flip: false,
+      flipY: false,
+      flipX: false,
     };
     this.points = [];
     this.stroke = {
       enabled: false,
-      fill: undefined,
-      width: undefined,
+      fill: "#000000ff",
+      width: 10,
+      cap: "butt",
+      join: "miter",
     };
     this.fill = {
       enabled: false,
-      fill: undefined,
+      fill: "#000000ff",
     };
     this.image = {
       enabled: false,
@@ -43,24 +47,37 @@ class hexagonClass extends shapeClass {
     super();
     (this.name = "Hexagon"),
       (this.dimension = {
-        height: Math.sqrt(3),
-        width: 1.5,
-        xOffset: 1.5, // how much to move each turn
-        yOffset: Math.sqrt(3), // how much to move up down each
+        height: Math.sqrt(3) * (Math.sqrt(3) / 3),
+        width: 1.5 * (Math.sqrt(3) / 3),
+        xOffset: 1.5 * (Math.sqrt(3) / 3), // how much to move each turn
+        yOffset: Math.sqrt(3) * (Math.sqrt(3) / 3), // how much to move up down each
         alternateX: false,
         alternateXOffset: undefined,
         alternateY: true, //alternate between 0 and yOffset
-        alternateYOffset: [0, Math.sqrt(3) / 2],
-        flip: false,
+        alternateYOffset: [0, (Math.sqrt(3) / 2) * (Math.sqrt(3) / 3)],
+        flipY: false,
+        flipX: false,
       });
     this.points = [
-      { x: 1, y: 0 },
-      { x: 0.5, y: Math.sqrt(3) / 2 },
-      { x: -0.5, y: Math.sqrt(3) / 2 },
-      { x: -1, y: 0 },
-      { x: -0.5, y: -Math.sqrt(3) / 2 },
-      { x: 0.5, y: -Math.sqrt(3) / 2 },
-      { x: 1, y: 0 },
+      { x: 1 * (Math.sqrt(3) / 3), y: 0 },
+      {
+        x: 0.5 * (Math.sqrt(3) / 3),
+        y: (Math.sqrt(3) / 2) * (Math.sqrt(3) / 3),
+      },
+      {
+        x: -0.5 * (Math.sqrt(3) / 3),
+        y: (Math.sqrt(3) / 2) * (Math.sqrt(3) / 3),
+      },
+      { x: -1 * (Math.sqrt(3) / 3), y: 0 },
+      {
+        x: -0.5 * (Math.sqrt(3) / 3),
+        y: (-Math.sqrt(3) / 2) * (Math.sqrt(3) / 3),
+      },
+      {
+        x: 0.5 * (Math.sqrt(3) / 3),
+        y: (-Math.sqrt(3) / 2) * (Math.sqrt(3) / 3),
+      },
+      { x: 1 * (Math.sqrt(3) / 3), y: 0 },
     ];
   }
 }
@@ -69,22 +86,23 @@ class squareClass extends shapeClass {
     super();
     (this.name = "Square"),
       (this.dimension = {
-        width: 2,
-        height: 2,
-        xOffset: 2, // offset per column
-        yOffset: 2, // offset per row
+        width: 1,
+        height: 1,
+        xOffset: 1, // offset per column
+        yOffset: 1, // offset per row
         alternateX: false,
         alternateXOffset: undefined,
         alternateY: false,
         alternateYOffset: undefined,
-        flip: false,
+        flipY: false,
+        flipX: false,
       });
     this.points = [
-      { x: -1, y: -1 },
-      { x: 1, y: -1 },
-      { x: 1, y: 1 },
-      { x: -1, y: 1 },
-      { x: -1, y: -1 },
+      { x: -0.5, y: -0.5 },
+      { x: 0.5, y: -0.5 },
+      { x: 0.5, y: 0.5 },
+      { x: -0.5, y: 0.5 },
+      { x: -0.5, y: -0.5 },
     ];
   }
 }
@@ -93,15 +111,16 @@ class circleClass extends shapeClass {
     super();
     (this.name = "Circle"),
       (this.dimension = {
-        height: 2,
-        width: 2,
-        xOffset: Math.sqrt(3), // offset per column
-        yOffset: 2, // offset per row
+        height: 2 / 2,
+        width: 2 / 2,
+        xOffset: Math.sqrt(3) / 2, // offset per column
+        yOffset: 2 / 2, // offset per row
         alternateX: false,
         alternateXOffset: undefined,
         alternateY: true,
-        alternateYOffset: [0, 1],
-        flip: false,
+        alternateYOffset: [0, 1 / 2],
+        flipY: false,
+        flipX: false,
       });
     this.points = [];
     const sides = 32;
@@ -109,37 +128,159 @@ class circleClass extends shapeClass {
     for (let i = 0; i < sides; i++) {
       const angle = i * angleStep;
       this.points[i] = {
-        x: Math.cos(angle),
-        y: Math.sin(angle),
+        x: Math.cos(angle) / 2,
+        y: Math.sin(angle) / 2,
       };
     }
   }
 }
-
+class triangleClass extends shapeClass {
+  constructor() {
+    super();
+    (this.name = "Triangle"),
+      (this.dimension = {
+        height: 1,
+        width: Math.sqrt(3) / 3,
+        xOffset: Math.sqrt(3) / 3, // offset per column
+        yOffset: 1, // offset per row
+        alternateX: true,
+        alternateXOffset: [0, -Math.sqrt(3) / 3],
+        alternateY: true,
+        alternateYOffset: [0.33, 0],
+        flipY: true,
+        flipX: false,
+      });
+    this.points = [
+      { x: 0, y: -2 / 3 },
+      { x: Math.sqrt(3) / 3, y: 1 / 3 },
+      { x: -Math.sqrt(3) / 3, y: 1 / 3 },
+      { x: 0, y: -2 / 3 },
+    ];
+  }
+}
+// refer back to shape from JS (updateGrid())
 class shapeUI {
   constructor(shape) {
     this.shape = shape;
     this.name = shape.name;
   }
+  createSlider = function (
+    // name = "",
+    title = "",
+    range = { min: 0, max: 200, step: 1 },
+    value = { object: undefined, value: undefined },
+    box = { object: undefined, value: undefined },
+    sync = true,
+    type = "number",
+    updateFunction = undefined,
+  ) {
+    // console.log("values:", property, this.property);
+    // value = 25;
+    // console.log("values:", property, this.property);
+    //define objects
+    let baseDiv = document.createElement("div");
+    let valueBox = document.createElement("input");
+    let slider = document.createElement("input");
+    let label = document.createElement("label");
+    let leftDiv = document.createElement("div");
+    // set info
+    valueBox.type = type;
+    valueBox.step = range.step;
+    slider.type = "range";
+    (slider.min = range.min), (slider.max = range.max);
+    slider.step = range.step;
+    label.innerText = title;
+    label.for = valueBox;
+    // update and link values
+    valueBox.value = box.object[value.value];
+    // valueBox.oninput = (ev) => {
+    //   box.object[box.value] = valueBox.value;
+    //   if (type == "number") valueBox.value = Number(box.object[box.value]);
+    //   if (sync) slider.value = box.object[value.value];
+    //   if (updateFunction) updateFunction();
+    // };
+
+    valueBox.onblur =
+      valueBox.oninput =
+      valueBox.onkeydown =
+        (event) => {
+          if (
+            (event.type === "keydown" && event.key === "Enter") ||
+            event.type === "blur" ||
+            (event.type === "input" &&
+              event.inputType === "insertReplacementText")
+          ) {
+            box.object[box.value] = valueBox.value;
+            if (type == "number")
+              valueBox.value = Number(box.object[box.value]);
+            if (sync) slider.value = box.object[value.value];
+            if (updateFunction) updateFunction();
+          }
+        };
+    // valueBox.onblur = valueBox.oninput = (event) => {
+    //   console.log(event);
+    //   if (event.type === "blur" || event.key === "Enter") {
+    //     box.object[box.value] = valueBox.value;
+    //     if (type == "number") valueBox.value = Number(box.object[box.value]);
+    //     if (sync) slider.value = box.object[value.value];
+    //     if (updateFunction) updateFunction();
+    //   }
+    // };
+    slider.value = value.object[value.value];
+    slider.oninput = () => {
+      value.object[value.value] = Number(slider.value);
+      if (sync) valueBox.value = value.object[value.value];
+
+      if (updateFunction) updateFunction();
+    };
+    // styling and layout
+    baseDiv.classList.add("flex", "flexDiv", "inputDiv");
+    valueBox.classList.add(
+      "flexItem",
+      "flexRight",
+      "flexStaticWidth",
+      "flexValueBox",
+    );
+
+    slider.classList.add("rangeSlider");
+    leftDiv.classList.add("flex", "flexDiv", "flexItem");
+    leftDiv.style.flexDirection = "column";
+    label.style.width = "100%";
+    slider.style.width = "100%";
+
+    leftDiv.append(label);
+    leftDiv.append(slider);
+    baseDiv.append(leftDiv);
+    baseDiv.append(valueBox);
+    return baseDiv;
+  };
   generateHTML = function () {
-    const generateFieldset = function (title = "", check = true) {
+    const generateFieldset = function (
+      title = "",
+      check = true,
+      updateFunction = updateGrid,
+    ) {
       let fieldset = document.createElement("fieldset");
       let legend = document.createElement("legend");
+      fieldset.classList.add("shapeSet");
       if (check) {
-        let checkbox = document.createElement("input");
+        var checkbox = document.createElement("input");
+        fieldset.classList.add("hideContent");
         checkbox.oninput = (ev) => {
           if (ev.target.checked) {
             fieldset.classList.remove("hideContent");
+            if (keepUpdated) updateGrid;
           } else {
             fieldset.classList.add("hideContent");
+            if (keepUpdated) updateGrid;
           }
         };
         checkbox.type = "checkbox";
         checkbox.classList.add("legendCheckbox");
-      }
-      if (check) {
         legend.appendChild(checkbox);
+        fieldset.checkbox = checkbox; // Add checkbox to fieldset for later access
       }
+
       legend.appendChild(document.createTextNode(title));
       fieldset.append(legend);
       return fieldset;
@@ -152,182 +293,291 @@ class shapeUI {
       let legendInput = document.createElement("input");
       legendInput.type = "text";
       legendInput.name = this.name;
+      legendInput.value = this.name;
       legendInput.oninput = (ev) => (this.name = ev.target.value);
       legend.append(legendInput);
       fieldset.append(legend);
       return fieldset;
     })();
+    var shape = this.shape;
+    fieldset.shape = shape;
+    // fieldset.shape.radius = 15;
+    // console.log(shape.radius, fieldset.shape.radius, this.shape.radius);
 
     // radus, margin, weight
-    const createSlider = function (
-      // name = "",
-      title = "",
-      range = { min: 0, max: 200 },
-      value = { slider: undefined, value: undefined, sync: true },
-      type = "number",
-      updateFunction = undefined,
-    ) {
-      //define objects
-      let baseDiv = document.createElement("div");
-      let valueBox = document.createElement("input");
-      let slider = document.createElement("input");
-      let label = document.createElement("label");
-      let leftDiv = document.createElement("div");
-      // set info
-      valueBox.type = type;
-      slider.type = "range";
-      (slider.min = range.min), (slider.max = range.max);
-      label.value = title;
-      label.for = valueBox;
-      // update and link values
-      valueBox.oninput = () => {
-        value.value = valueBox.value;
-        if (sync) slider.value = valueBox.value;
-        if (updateFunction) updateFunction();
-      };
-      slider.oninput = () => {
-        value.value = slider.value;
-        if (sync) valueBox.value = slider.value;
-        if (updateFunction) updateFunction();
-      };
-      // styling and layout
-      baseDiv.classList.add("flex", "flexDiv", "inputDiv");
-      valueBox.classList.add("flexItem", "flexRight", "flexStaticWidth");
-      // slider.classList.add()
-      leftDiv.classList.add("flex", "flexDiv", "flexItem");
-      leftDiv.style.flexDirection = "column";
-      label.style.width = "100%";
-      slider.style.width = "100%";
-      leftDiv.append(label);
-      leftDiv.append(slider);
-      baseDiv.append(leftDiv);
-      baseDiv.append(valueBox);
-      return baseDiv;
-    };
-    let radius = createSlider(
+    let radius = this.createSlider(
       "shape radius:",
       undefined,
-      { slider: this.shape.radius, value: this.shape.radius, sync: true },
+      { object: shape, value: "radius" },
+      { object: shape, value: "radius" },
+      true,
       undefined,
-      this.updateGrid,
+      updateGrid,
+      undefined,
     );
-    let margin = createSlider(
+    let margin = this.createSlider(
       "shape margin:",
       undefined,
-      { slider: this.shape.margin, value: this.shape.margin, sync: true },
+      { object: shape, value: "margin" },
+      { object: shape, value: "margin" },
+      true,
       undefined,
-      this.updateGrid,
+      updateGrid,
     );
-    let weight = createSlider(
+    let weight = this.createSlider(
       "random Weight:",
-      { min: 0, max: 5 },
-      { slider: this.shape.weight, value: this.shape.weight, sync: true },
+      { min: 0, max: 5, step: 0.01 },
+      { object: shape, value: "weight" },
+      { object: shape, value: "weight" },
+      true,
       undefined,
-      this.updateGrid,
+      updateGrid,
     );
     fieldset.append(radius, margin, weight);
     let strokeFieldset = generateFieldset("strokeFieldset");
+    strokeFieldset.checkbox.addEventListener("click", (ev) => {
+      shape.stroke.enabled = ev.target.checked;
+      if (keepUpdated) {
+        updateGrid();
+      }
+    });
     strokeFieldset.append(
       (() => {
-        let transparency;
-        let color;
-        const updateColor = () => {
-          this.shape.stroke.fill = RGBToRGBA(color, transparency);
+        let colors = {
+          color: this.shape.stroke.fill.slice(0, 7),
+          transparency: parseInt(this.shape.stroke.fill.slice(7), 16),
         };
-        let colorSlider = createSlider(
+        // var transparency;
+        // var color;
+        let updateColor = () => {
+          shape.stroke.fill = RGBToRGBA(colors.color, colors.transparency);
+          if (keepUpdated) {
+            updateGrid();
+          }
+        };
+
+        let colorSlider = this.createSlider(
           "stroke color",
-          { min: 0, max: 255 },
-          { slider: transparency, value: color, sync: false },
+          { min: 0, max: 255, step: 1 },
+          { object: colors, value: "transparency" },
+          { object: colors, value: "color" },
+          false,
           "color",
           updateColor,
         );
-        let widthSlider = createSlider(
-          "stroke width",
-          { min: 0, max: 100 },
-          {
-            slider: this.shape.stroke.width,
-            value: this.shape.stroke.width,
-            sync: true,
-          },
-          undefined,
-          this.updateGrid,
-        );
-        return colorSlider, widthSlider;
+        shape.stroke.fill = RGBToRGBA(colors.color, colors.transparency);
+
+        return colorSlider;
       })(),
     );
+    strokeFieldset.append(
+      (() => {
+        var widthSlider = this.createSlider(
+          "stroke width",
+          { min: 0, max: 255, step: 1 },
+          { object: shape.stroke, value: "width" },
+          { object: shape.stroke, value: "width" },
+          true,
+          undefined,
+          updateGrid,
+        );
+        return widthSlider;
+      })(),
+    );
+    const multiSelect = (
+      options,
+      name,
+      value = { object: shape.stroke, value: "cap" },
+    ) => {
+      let baseDiv = document.createElement("div");
+      let select = document.createElement("select");
+      let label = document.createElement("label");
+      let leftDiv = document.createElement("div");
+
+      leftDiv.classList.add("flex", "flexDiv", "flexItem");
+      baseDiv.classList.add("flex", "flexDiv", "inputDiv");
+      select.classList.add(
+        "flexItem",
+        "flexRight",
+        "flexStaticWidth",
+        "flexValueBox",
+      );
+      label.innerText = name;
+      label.for = select;
+
+      options.forEach((option) => {
+        let opt = document.createElement("option");
+        opt.value = option;
+        opt.text = option;
+        select.appendChild(opt);
+      });
+
+      select.value = value.object[value.value];
+      select.onchange = (ev) => {
+        value.object[value.value] = ev.target.value;
+        if (keepUpdated) {
+          updateGrid();
+        }
+      };
+
+      leftDiv.appendChild(label);
+      baseDiv.appendChild(leftDiv);
+      baseDiv.appendChild(select);
+
+      return baseDiv;
+    };
+    strokeFieldset.append(
+      multiSelect(["round", "butt", "square"], "stroke cap", {
+        object: shape.stroke,
+        value: "cap",
+      }),
+    );
+    strokeFieldset.append(
+      multiSelect(["round", "bevel", "miter"], "stroke join", {
+        object: shape.stroke,
+        value: "join",
+      }),
+    );
     let fillFieldset = generateFieldset("fillFieldset");
+    fillFieldset.checkbox.addEventListener("click", (ev) => {
+      shape.fill.enabled = ev.target.checked;
+      if (keepUpdated) {
+        updateGrid();
+      }
+    });
     fillFieldset.append(
       (() => {
-        let transparency;
-        let color;
-        const updateColor = () => {
-          this.shape.fill.fill = RGBToRGBA(color, transparency);
-          updateGrid()
+        let colors = {
+          color: this.shape.fill.fill.slice(0, 7),
+          transparency: parseInt(this.shape.fill.fill.slice(7), 16),
         };
-        let colorSlider = createSlider(
-          "fill color",
-          { min: 0, max: 255 },
-          { slider: transparency, value: color, sync: false },
+        const updateColor = () => {
+          shape.fill.fill = RGBToRGBA(colors.color, colors.transparency);
+          if (keepUpdated) {
+            updateGrid();
+          }
+        };
+        let colorSlider = this.createSlider(
+          "stroke color",
+          { min: 0, max: 255, step: 1 },
+          { object: colors, value: "transparency" },
+          { object: colors, value: "color" },
+          false,
           "color",
           updateColor,
         );
 
-        return colorSlider, widthSlider;
+        return colorSlider;
       })(),
     );
     let imageFieldset = generateFieldset("imageFieldset");
     let advancedFieldset = generateFieldset("advancedFieldset");
-    fieldset.append(strokeFieldset, fillFieldset);
-  };
-  updateGrid = function () {
-    // need to update this to get all shapeUI elements
-    generateShapeGrid([this]);
+    let removeButton = document.createElement("button");
+    removeButton.innerText = "Remove shape";
+    removeButton.classList.add("centerElement");
+    removeButton.addEventListener("click", () => {
+      fieldset.remove();
+      if (keepUpdated) updateGrid();
+    });
+    fieldset.append(strokeFieldset, fillFieldset, removeButton);
+    return fieldset;
   };
 }
+shapeFieldset = document.getElementById("shapeFieldset");
+function updateGrid() {
+  // console.log(shapeFieldset);
+  if (!keepUpdated) return;
+  var shapes = [];
+  for (element of shapeFieldset.getElementsByClassName("shapeFieldset")) {
+    // console.log("element:", element);
+    shapes.push(element.shape);
+  }
+  // console.log("shapes:", shapes);
+  if (shapes != []) {
+    generateShapeGrid(shapes);
+  }
+}
+getShapes = function () {
+  var shapes = [];
+  for (element of shapeFieldset.getElementsByClassName("shapeFieldset")) {
+    // console.log("element:", element);
+    shapes.push(element.shape);
+  }
+  return shapes;
+};
 
 var mainCanvas = document.getElementById("mainCanvas");
 var ctx = mainCanvas.getContext("2d");
 
-var customHexagon = new hexagonClass();
-customHexagon.stroke.enabled = true;
-customHexagon.stroke.width = 10;
-customHexagon.stroke.fill = "black";
+var docWidth = document.getElementById("docWidth");
+var docWidthOutput = document.getElementById("docWidthOutput");
 
-customHexagon.radius = 75;
-customHexagon.margin = 10;
+var docHeight = document.getElementById("docHeight");
+var docHeightOutput = document.getElementById("docHeightOutput");
 
-let img = new Image();
-// img.src = "./smile.jpg";
-img.onload = function () {
-  console.log("Image loaded:", this.width, this.height);
+var documentWidth;
+var documentHeight;
+
+const updateWidth = function () {
+  mainCanvas.width =
+    documentWidth =
+    docWidth.value =
+    docWidthOutput.value =
+      this.value;
+  if (keepUpdated) {
+    updateGrid();
+  }
 };
-// ctx.drawImage(img, 50, 50);
-customHexagon.image.image = img;
-// customHexagon.image.enabled = true;
-customHexagon.image.width = 50;
-customHexagon.image.height = 50;
 
-var customCircle = new circleClass();
-customCircle.stroke.enabled = true;
-customCircle.stroke.width = 3;
-customCircle.stroke.fill = "red";
+const updateHeight = function () {
+  mainCanvas.height =
+    documentHeight =
+    docHeight.value =
+    docHeightOutput.value =
+      this.value;
+  if (keepUpdated) {
+    updateGrid();
+  }
+};
 
-customCircle.radius = (75 * Math.sqrt(3)) / 2;
-customCircle.margin = 10;
-customCircle.weight = 1;
+docWidth.oninput = updateWidth;
+docWidthOutput.oninput = updateWidth;
 
-var customSquare = new squareClass();
-customSquare.stroke.enabled = true;
-customSquare.stroke.width = 5;
-customSquare.stroke.fill = "blue";
+docHeight.oninput = updateHeight;
+docHeightOutput.oninput = updateHeight;
 
-customSquare.radius = customCircle.radius;
-customSquare.margin = 10;
-customSquare.dimension.alternateY = customCircle.dimension.alternateY;
-customSquare.dimension.alternateYOffset =
-  customCircle.dimension.alternateYOffset;
-customSquare.dimension.yOffset = customCircle.dimension.yOffset;
-customSquare.dimension.xOffset = customCircle.dimension.xOffset;
+var randomGridArray = randomGrid();
+
+let keepUpdatedBox = document.getElementById("keepUpdatedBox");
+
+keepUpdatedBox.oninput = function (ev) {
+  keepUpdated = ev.target.checked;
+};
+
+updateWidth.call(docWidth);
+updateHeight.call(docHeight);
+let generateButton = document.getElementById("generateButton");
+generateButton.onclick = updateGrid;
+
+writeShape = (shapeClass) => {
+  let shapeui = new shapeUI(shapeClass);
+  shapeFieldset.append(shapeui.generateHTML());
+  console.log(shapeui);
+  if (keepUpdated) updateGrid();
+};
+document.getElementById("circle").addEventListener("click", () => {
+  writeShape(new circleClass());
+});
+document.getElementById("hexagon").addEventListener("click", () => {
+  writeShape(new hexagonClass());
+});
+document.getElementById("square").addEventListener("click", () => {
+  writeShape(new squareClass());
+});
+document.getElementById("triangle").addEventListener("click", () => {
+  writeShape(new triangleClass());
+});
+// document.getElementById("triangle").oninput = writeShape(new triangleClass);
 
 function randomGrid(rows = 50, cols = 50) {
   let getFloat = () => {
@@ -343,22 +593,23 @@ function randomGrid(rows = 50, cols = 50) {
   }
   return grid;
 }
-var randomGridArray = randomGrid();
-function generateShapeGrid(shapes = [], grid = randomGridArray) {
+function generateShapeGrid(shapes = getShapes(), grid = randomGridArray) {
   ctx.clearRect(0, 0, documentWidth, documentHeight);
   //assume same type (hex, circle, etc)
+  var firstShape = shapes[0];
   // console.log(shapes);
-  let firstShape = shapes[0];
   const rows = Math.ceil(
-    documentWidth / (firstShape.dimension.width * firstShape.radius) + 1,
+    documentWidth / (firstShape.dimension.width * firstShape.radius) + 2,
   );
+  // console.log(documentWidth, firstShape.dimension.width, firstShape.radius);
   const cols = Math.ceil(
-    documentHeight / (firstShape.dimension.width * firstShape.radius) + 1,
+    documentHeight / (firstShape.dimension.width * firstShape.radius) + 2,
   );
   if (grid.length < rows || grid[1].length < cols) {
     grid = randomGrid(rows, cols);
   }
-  console.log(rows, cols);
+
+  // console.log(rows, cols);
   for (let i = 0; i < cols; i++) {
     for (let j = 0; j < rows; j++) {
       // console.log(i, j);
@@ -367,6 +618,7 @@ function generateShapeGrid(shapes = [], grid = randomGridArray) {
       shape.col = j;
       generateShape(shape);
     }
+    // console.log(shapes);
   }
 }
 function sampleShape(
@@ -377,12 +629,25 @@ function sampleShape(
   if (shapes.length == 1) {
     return shapes[0];
   }
-  shapes.sort((a, b) => a.weight - b.weight);
+  // shapes.sort((a, b) => parseFloat(a.weight) - parseFloat(b.weight));
   let totalWeight = shapes.reduce((sum, shape) => {
     return sum + shape.weight;
   }, 0);
 
   let thisWeight = grid[position.row][position.col] * totalWeight;
+  console.log(
+    "sort",
+    (() => {
+      let a = [];
+      for (element of shapes) {
+        a.push(element.weight);
+      }
+      return a;
+    })(),
+    totalWeight,
+    thisWeight,
+  );
+
   // console.log(grid[position.row][position.col], thisWeight, totalWeight);
   let total = 0;
   for (element of shapes) {
@@ -395,7 +660,9 @@ function sampleShape(
   // return shapes[0];
 }
 function generateShape(shape) {
+  // console.log(shape);
   ctx.beginPath();
+  // console.log("drawing", shape);
   centerX = shape.col * shape.radius * shape.dimension.xOffset;
   centerY = shape.row * shape.radius * shape.dimension.yOffset;
   if (shape.dimension.alternateX) {
@@ -410,28 +677,19 @@ function generateShape(shape) {
         shape.col % shape.dimension.alternateYOffset.length
       ] * shape.radius;
   }
-  // for (let i = 0; i <= Object.keys(shape.points).length; i++) {
-  //   if (i === 0) {
-  //     ctx.moveTo(
-  //       centerX + shape.points[i].x * shape.radius,
-  //       centerY + shape.points[i].y * shape.radius,
-  //     );
-  //   } else {
-  //     ctx.lineTo(
-  //       centerX + shape.points[i].x * shape.radius,
-  //       centerY + shape.points[i].y * shape.radius,
-  //     );
-  //   }
-  // }
+  let xMultiplier = 1;
+  let yMultiplier = 1;
+  if (shape.dimension.flipX == true) xMultiplier = shape.rows % 2 == 0 ? 1 : -1;
+  if (shape.dimension.flipY == true) yMultiplier = shape.col % 2 == 0 ? 1 : -1;
 
   ctx.moveTo(
-    centerX + shape.points[0].x * (shape.radius - shape.margin),
-    centerY + shape.points[0].y * (shape.radius - shape.margin),
+    centerX + shape.points[0].x * (shape.radius - shape.margin) * xMultiplier,
+    centerY + shape.points[0].y * (shape.radius - shape.margin) * yMultiplier,
   );
   for (point of shape.points) {
     ctx.lineTo(
-      centerX + point.x * (shape.radius - shape.margin),
-      centerY + point.y * (shape.radius - shape.margin),
+      centerX + point.x * (shape.radius - shape.margin) * xMultiplier,
+      centerY + point.y * (shape.radius - shape.margin) * yMultiplier,
     );
   }
   //
@@ -453,12 +711,17 @@ function generateShape(shape) {
   if (shape.stroke.enabled) {
     ctx.lineWidth = shape.stroke.width;
     ctx.strokeStyle = shape.stroke.fill;
-    // console.log("filling line", ctx.lineWidth, ctx.strokeStyle, shape.points);
+    ctx.lineCap = shape.stroke.cap;
+    ctx.lineJoin = shape.stroke.join;
+
+    console.log("filling line", ctx.strokeStyle, shape);
     ctx.stroke();
   }
   ctx.moveTo(centerX, centerY);
 }
 function RGBToRGBA(color, value) {
+  // console.log(color, value);
   var alphaHex = parseInt(value).toString(16).padStart(2, "0");
   return color + alphaHex;
 }
+keepUpdated = keepUpdatedBox.checked;

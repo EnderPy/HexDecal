@@ -74,6 +74,8 @@
     }
     .flexDiv {
       /* display: flex; */
+      /* margin-right: 15px; */
+      flex-grow: 1;
     }
     .flexStaticWidth {
       flex-shrink: 0;
@@ -81,6 +83,24 @@
     }
     .hideContent > *:not(legend) {
       display: none;
+    }
+    .rangeSlider {
+      margin: 5px;
+    }
+    .flexValueBox {
+      width: 5em;
+      margin-left: 15px;
+      height: fit-content;
+      margin-top: auto;
+      margin-bottom: auto;
+    }
+    input[type="color"].flexValueBox {
+      width: 3em;
+      height: 3em;
+    }
+    .centerElement {
+      margin-top: 10px;
+      transform: translate(50%);
     }
   </style>
 </head>
@@ -136,37 +156,46 @@
           <div id="decals">
             <div>
               <input
-                type="radio"
+                type="button"
                 id="hexagon"
-                value="hexagon"
+                value="new Hexagon"
                 name="polygon"
-                checked
               />
-              <label for="hexagon">Hexagon style</label>
+              <!-- <label for="hexagon">Hexagon style</label> -->
             </div>
             <div>
               <input
-                type="radio"
+                type="button"
                 id="square"
-                value="square"
+                value="new Square"
                 name="polygon"
-                disabled
               />
-              <label for="square">Square style</label>
+              <!-- <label for="square">Square style</label> -->
             </div>
             <div>
               <input
-                type="radio"
-                id="triangle"
-                value="triangle"
+                type="button"
+                id="circle"
+                value="new Circle"
                 name="polygon"
-                disabled
               />
-              <label for="triangle">Triangle style</label>
+              <!-- <label for="circle">Circle style</label> -->
+            </div>
+            <div>
+              <input
+                type="button"
+                id="triangle"
+                value="new Triangle"
+                name="polygon"
+              />
+              <!-- <label for="hexagon">Hexagon style</label> -->
             </div>
           </div>
         </fieldset>
-        <fieldset>
+        <fieldset id="shapeFieldset">
+          <legend>Shapes</legend>
+        </fieldset>
+        <!-- <fieldset>
           <label for="widthSlider" class="rangeLabel">Decal width: </label>
           <input
             type="number"
@@ -279,15 +308,6 @@
               step="1"
             />
           </div>
-          <!-- <div class="colorSelect">
-            <input
-            type="checkbox"
-            name="backgroundColorClear"
-            id="backgroundColorClear"
-          />
-          <label class="colorSelect" for="backgroundColorClear">clear background</label>
-
-          </div> -->
         </fieldset>
         <fieldset id="iconFieldset">
           <legend>Icon settings</legend>
@@ -297,9 +317,9 @@
             type="button"
             value="Add Icon"
             onclick="generateIconHTML.call(this)"
-          />
+          /> -->
 
-          <!-- <fieldset class="iconContainer">
+        <!-- <fieldset class="iconContainer">
             <label for="toggleIcon">Toggle Icon</label>
             <input type="checkbox" name="toggleIcon" checked />
             <div class="iconDiv">
@@ -351,15 +371,15 @@
               onclick="removeIcon.call(this)"
             />
           </fieldset> -->
-        </fieldset>
-        <input type="checkbox" name="keepUpdated" id="keepUpdated" />
-        <label for="keepUpdated">update when values changed</label>
+        <!-- </fieldset> -->
+        <input type="checkbox" name="keepUpdatedBox" id="keepUpdatedBox" />
+        <label for="keepUpdatedBox">update when values changed</label>
         <input type="button" value="Update Grid" id="generateButton" />
         <!-- <img class="iconUpload iconImage" name="iconImage" hidden /> -->
       </fieldset>
     </div>
   </div>
-  <script src="./main.js"></script>
+  <!-- <script type="module" src="./main.js"></script> -->
   <script src="./shapes.js"></script>
   <!-- <script type="module" src="./simple-hash.js"></script> -->
 </body>
