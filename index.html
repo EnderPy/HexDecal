@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <head>
   <style>
     #mainContainer {
@@ -58,10 +58,10 @@
       border-radius: 10px;
     }
     input[type="file"].iconUpload {
-      max-width: 16em;
+      max-width: 14em;
     }
     .iconImageDiv {
-      max-width: 14em;
+      max-width: 12em;
       overflow: scroll;
     }
     .iconImage {
@@ -147,6 +147,24 @@
               min="100"
               max="4096"
               value="1080"
+            />
+          </div>
+          <div>
+            <label for="backgroundColor" class="rangeLabel">Background Color: </label>
+            <input
+              type="color"
+              name="backgroundColor"
+              id="backgroundColor"
+              class="rangeInputBox"
+            />
+            <input
+              type="range"
+              class="rangeInput"
+              name="backgroundColorOpacity"
+              id="backgroundColorOpacity"
+              min="0"
+              max="255"
+              value="0"
             />
           </div>
         </fieldset>

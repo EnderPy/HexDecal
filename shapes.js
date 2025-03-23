@@ -35,9 +35,9 @@ class shapeClass {
     };
     this.image = {
       enabled: false,
-      image: {},
-      width: undefined,
-      height: undefined,
+      image: new Image(),
+      width: 100,
+      height: 100,
     };
   }
 }
@@ -172,7 +172,7 @@ class shapeUI {
     box = { object: undefined, value: undefined },
     sync = true,
     type = "number",
-    updateFunction = undefined,
+    updateFunction = undefined
   ) {
     // console.log("values:", property, this.property);
     // value = 25;
@@ -192,7 +192,7 @@ class shapeUI {
     label.innerText = title;
     label.for = valueBox;
     // update and link values
-    valueBox.value = box.object[value.value];
+    valueBox.value = box.object[box.value];
     // valueBox.oninput = (ev) => {
     //   box.object[box.value] = valueBox.value;
     //   if (type == "number") valueBox.value = Number(box.object[box.value]);
@@ -204,14 +204,20 @@ class shapeUI {
       valueBox.oninput =
       valueBox.onkeydown =
         (event) => {
-          if (
+          if (event.target.type == "file") {
+            if (event.type == "input") {
+              console.log("File event:", event);
+              box.object[box.value] = event.target.files[0];
+              if (updateFunction) updateFunction();
+            }
+          } else if (
             (event.type === "keydown" && event.key === "Enter") ||
             event.type === "blur" ||
             (event.type === "input" &&
               event.inputType === "insertReplacementText")
           ) {
             box.object[box.value] = valueBox.value;
-            if (type == "number")
+            if (valueBox.type == "number")
               valueBox.value = Number(box.object[box.value]);
             if (sync) slider.value = box.object[value.value];
             if (updateFunction) updateFunction();
@@ -239,7 +245,7 @@ class shapeUI {
       "flexItem",
       "flexRight",
       "flexStaticWidth",
-      "flexValueBox",
+      "flexValueBox"
     );
 
     slider.classList.add("rangeSlider");
@@ -258,7 +264,7 @@ class shapeUI {
     const generateFieldset = function (
       title = "",
       check = true,
-      updateFunction = updateGrid,
+      updateFunction = updateGrid
     ) {
       let fieldset = document.createElement("fieldset");
       let legend = document.createElement("legend");
@@ -313,7 +319,7 @@ class shapeUI {
       true,
       undefined,
       updateGrid,
-      undefined,
+      undefined
     );
     let margin = this.createSlider(
       "shape margin:",
@@ -322,7 +328,7 @@ class shapeUI {
       { object: shape, value: "margin" },
       true,
       undefined,
-      updateGrid,
+      updateGrid
     );
     let weight = this.createSlider(
       "random Weight:",
@@ -331,7 +337,7 @@ class shapeUI {
       { object: shape, value: "weight" },
       true,
       undefined,
-      updateGrid,
+      updateGrid
     );
     fieldset.append(radius, margin, weight);
     let strokeFieldset = generateFieldset("strokeFieldset");
@@ -363,12 +369,12 @@ class shapeUI {
           { object: colors, value: "color" },
           false,
           "color",
-          updateColor,
+          updateColor
         );
         shape.stroke.fill = RGBToRGBA(colors.color, colors.transparency);
 
         return colorSlider;
-      })(),
+      })()
     );
     strokeFieldset.append(
       (() => {
@@ -379,15 +385,15 @@ class shapeUI {
           { object: shape.stroke, value: "width" },
           true,
           undefined,
-          updateGrid,
+          updateGrid
         );
         return widthSlider;
-      })(),
+      })()
     );
     const multiSelect = (
       options,
       name,
-      value = { object: shape.stroke, value: "cap" },
+      value = { object: shape.stroke, value: "cap" }
     ) => {
       let baseDiv = document.createElement("div");
       let select = document.createElement("select");
@@ -400,7 +406,7 @@ class shapeUI {
         "flexItem",
         "flexRight",
         "flexStaticWidth",
-        "flexValueBox",
+        "flexValueBox"
       );
       label.innerText = name;
       label.for = select;
@@ -430,13 +436,13 @@ class shapeUI {
       multiSelect(["round", "butt", "square"], "stroke cap", {
         object: shape.stroke,
         value: "cap",
-      }),
+      })
     );
     strokeFieldset.append(
       multiSelect(["round", "bevel", "miter"], "stroke join", {
         object: shape.stroke,
         value: "join",
-      }),
+      })
     );
     let fillFieldset = generateFieldset("fillFieldset");
     fillFieldset.checkbox.addEventListener("click", (ev) => {
@@ -464,13 +470,76 @@ class shapeUI {
           { object: colors, value: "color" },
           false,
           "color",
-          updateColor,
+          updateColor
         );
 
         return colorSlider;
-      })(),
+      })()
     );
     let imageFieldset = generateFieldset("imageFieldset");
+    imageFieldset.checkbox.addEventListener("click", (ev) => {
+      shape.image.enabled = ev.target.checked;
+      if (keepUpdated) {
+        updateGrid();
+      }
+    });
+    imageFieldset.append(
+      (() => {
+        const baseDiv = document.createElement("div");
+        let imageProperties = {
+          imageSRC: "",
+          width: shape.image.width,
+        };
+        const updateImage = () => {
+          const reader = new FileReader();
+
+          reader.readAsDataURL(imageProperties.imageSRC);
+          reader.onload = function () {
+            shape.image.image.src = reader.result;
+            // imagePreview.src = reader.result;
+            // console.log(imageProperties.imageSRC);
+            // console.log(shape.image.image);
+            // console.log(reader.result);
+            shape.image.width = imageProperties.width;
+            shape.image.height =
+              imageProperties.width *
+              (shape.image.image.width / shape.image.image.height);
+            console.log("Shape dimensions:", shape.image.width);
+            imagePreview.src = shape.image.image.src;
+            imagePreview.width = shape.image.width;
+            imagePreview.height = shape.image.height;
+            if (keepUpdated) {
+              updateGrid();
+            }
+          };
+        };
+        let fileUpload = document.createElement("input");
+        fileUpload.type = "file";
+        fileUpload.classList.add("iconUpload");
+        let imageDiv = document.createElement("div");
+        imageDiv.classList.add("iconImageDiv");
+        let imagePreview = document.createElement("img");
+        imagePreview.classList.add("iconImage");
+        imageDiv.appendChild(imagePreview);
+        fileUpload.addEventListener("change", (event) => {
+          imageProperties.imageSRC = event.target.files[0];
+          updateImage();
+        });
+        let widthSlider = this.createSlider(
+          "Image Width",
+          { min: 0, max: 400, step: 1 },
+          { object: imageProperties, value: "width" },
+          { object: imageProperties, value: "width" },
+          true,
+          undefined,
+          updateImage
+        );
+        // shape.stroke.fill = RGBToRGBA(colors.color, colors.transparency);
+        baseDiv.append(fileUpload, widthSlider, imageDiv);
+        return baseDiv;
+      })()
+    );
+
     let advancedFieldset = generateFieldset("advancedFieldset");
     let removeButton = document.createElement("button");
     removeButton.innerText = "Remove shape";
@@ -479,14 +548,14 @@ class shapeUI {
       fieldset.remove();
       if (keepUpdated) updateGrid();
     });
-    fieldset.append(strokeFieldset, fillFieldset, removeButton);
+    fieldset.append(strokeFieldset, fillFieldset, imageFieldset, removeButton);
     return fieldset;
   };
 }
 shapeFieldset = document.getElementById("shapeFieldset");
 function updateGrid() {
   // console.log(shapeFieldset);
-  if (!keepUpdated) return;
+  // if (!keepUpdated) return;
   var shapes = [];
   for (element of shapeFieldset.getElementsByClassName("shapeFieldset")) {
     // console.log("element:", element);
@@ -515,8 +584,30 @@ var docWidthOutput = document.getElementById("docWidthOutput");
 var docHeight = document.getElementById("docHeight");
 var docHeightOutput = document.getElementById("docHeightOutput");
 
+var backgroundColorBox = document.getElementById("backgroundColor");
+var backgroundColorOpacitySlider = document.getElementById(
+  "backgroundColorOpacity"
+);
+
 var documentWidth;
 var documentHeight;
+
+var backgroundColor;
+
+const updateBackgroundColor = function () {
+  backgroundColor = RGBToRGBA(
+    backgroundColorBox.value,
+    backgroundColorOpacitySlider.value
+  );
+  if (keepUpdated) {
+    updateGrid();
+  }
+};
+
+backgroundColorBox.addEventListener("change", updateBackgroundColor);
+backgroundColorOpacitySlider.addEventListener("change", updateBackgroundColor);
+
+updateBackgroundColor();
 
 const updateWidth = function () {
   mainCanvas.width =
@@ -593,17 +684,24 @@ function randomGrid(rows = 50, cols = 50) {
   }
   return grid;
 }
-function generateShapeGrid(shapes = getShapes(), grid = randomGridArray) {
+function generateShapeGrid(
+  shapes = getShapes(),
+  grid = randomGridArray,
+  backColor = backgroundColor
+) {
   ctx.clearRect(0, 0, documentWidth, documentHeight);
+  ctx.fillStyle = backColor;
+  ctx.fillRect(0, 0, documentWidth, documentHeight);
   //assume same type (hex, circle, etc)
   var firstShape = shapes[0];
+  if (!firstShape) return;
   // console.log(shapes);
   const rows = Math.ceil(
-    documentWidth / (firstShape.dimension.width * firstShape.radius) + 2,
+    documentWidth / (firstShape.dimension.width * firstShape.radius) + 2
   );
   // console.log(documentWidth, firstShape.dimension.width, firstShape.radius);
   const cols = Math.ceil(
-    documentHeight / (firstShape.dimension.width * firstShape.radius) + 2,
+    documentHeight / (firstShape.dimension.width * firstShape.radius) + 2
   );
   if (grid.length < rows || grid[1].length < cols) {
     grid = randomGrid(rows, cols);
@@ -624,7 +722,7 @@ function generateShapeGrid(shapes = getShapes(), grid = randomGridArray) {
 function sampleShape(
   shapes = [],
   position = { row: 0, col: 0 },
-  grid = randomGridArray,
+  grid = randomGridArray
 ) {
   if (shapes.length == 1) {
     return shapes[0];
@@ -645,7 +743,7 @@ function sampleShape(
       return a;
     })(),
     totalWeight,
-    thisWeight,
+    thisWeight
   );
 
   // console.log(grid[position.row][position.col], thisWeight, totalWeight);
@@ -661,6 +759,7 @@ function sampleShape(
 }
 function generateShape(shape) {
   // console.log(shape);
+
   ctx.beginPath();
   // console.log("drawing", shape);
   centerX = shape.col * shape.radius * shape.dimension.xOffset;
@@ -684,17 +783,18 @@ function generateShape(shape) {
 
   ctx.moveTo(
     centerX + shape.points[0].x * (shape.radius - shape.margin) * xMultiplier,
-    centerY + shape.points[0].y * (shape.radius - shape.margin) * yMultiplier,
+    centerY + shape.points[0].y * (shape.radius - shape.margin) * yMultiplier
   );
   for (point of shape.points) {
     ctx.lineTo(
       centerX + point.x * (shape.radius - shape.margin) * xMultiplier,
-      centerY + point.y * (shape.radius - shape.margin) * yMultiplier,
+      centerY + point.y * (shape.radius - shape.margin) * yMultiplier
     );
   }
   //
   ctx.closePath();
   if (shape.fill.enabled) {
+    console.log("filling", shape.fill);
     ctx.fillStyle = shape.fill.fill;
     ctx.fill();
   }
@@ -702,10 +802,10 @@ function generateShape(shape) {
     console.log(shape);
     ctx.drawImage(
       shape.image.image,
-      centerY - shape.image.width / 2,
+      centerX - shape.image.width / 2,
       centerY - shape.image.height / 2,
       shape.image.width,
-      shape.image.height,
+      shape.image.height
     );
   }
   if (shape.stroke.enabled) {
@@ -714,7 +814,7 @@ function generateShape(shape) {
     ctx.lineCap = shape.stroke.cap;
     ctx.lineJoin = shape.stroke.join;
 
-    console.log("filling line", ctx.strokeStyle, shape);
+    // console.log("filling line", ctx.strokeStyle, shape);
     ctx.stroke();
   }
   ctx.moveTo(centerX, centerY);
